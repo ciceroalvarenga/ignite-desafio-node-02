@@ -36,12 +36,44 @@ function checksCreateTodosUserAvailability(request, response, next) {
 }
 
 function checksTodoExists(request, response, next) {
-  // Complete aqui
-  //to aqui
+  const { username } = request.headers;
+  const { id } = request.params;
+
+  const userExist = users.find((user) => user.username === username);
+
+  if (!userExist) {
+    return response.status(404).json({ error: "Todo not exist!" });
+  }
+
+  const isUUID = validate(id);
+
+  if (!isUUID) {
+    return response.status(400).json({ error: "id must be UUID" });
+  }
+
+  const todoValid = userExist.todos.find((todo) => todo.id === id);
+
+  if (!todoValid) {
+    return response.status(404).json({ error: "Todo not found" });
+  }
+
+  request.user = userExist;
+  request.todo = todoValid;
+  next();
 }
 
 function findUserById(request, response, next) {
-  // Complete aqui
+  const { id } = request.params;
+
+  const userExist = users.find((user) => user.id === id);
+
+  if (!userExist) {
+    return response.status(404).json({ error: "Todo not found" });
+  }
+
+  request.user = userExist;
+
+  next();
 }
 
 app.post("/users", (request, response) => {
